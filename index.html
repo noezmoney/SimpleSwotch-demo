@@ -1,71 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SimpleSwitch AI Demo</title>
-
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #0a0f1a;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
+    body { font-family: Arial; max-width: 600px; margin: 40px auto; }
+    select, input, button { padding: 10px; width: 100%; margin-top: 10px; }
+    #chat { border: 1px solid #ccc; padding: 15px; margin-top: 20px; height: 300px; overflow-y: auto; }
+    .msg { margin-bottom: 12px; }
+    .you { color: #1a73e8; font-weight: bold; }
+    .ai { color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
 
-    header {
-      padding: 20px;
-      text-align: center;
-      background: #0d1628;
-      border-bottom: 2px solid #1f5eff;
-    }
+  <h1>SimpleSwitch AI Demo</h1>
 
-    h1 {
-      font-size: 28px;
-      color: #4da3ff;
-      margin: 0;
-    }
+  <label>Industry</label>
+  <select id="industry">
+    <option>Plumbing</option>
+    <option>Electrician</option>
+    <option>HVAC</option>
+    <option>Cleaning</option>
+  </select>
 
-    .container {
-      max-width: 600px;
-      margin: 30px auto;
-      background: #111a2b;
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid #1f5eff;
-    }
+  <label>Role</label>
+  <select id="role">
+    <option value="customer">Customer</option>
+    <option value="owner">Owner</option>
+  </select>
 
-    label {
-      display: block;
-      margin-top: 15px;
-      font-size: 16px;
-    }
+  <input id="message" placeholder="Type your message..." />
 
-    select, input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
+  <button onclick="sendMessage()">Send</button>
 
-    select, input {
-      background: #0d1628;
-      color: white;
-      border: 1px solid #1f5eff;
-    }
+  <div id="chat"></div>
 
-    button {
-      background: #1f5eff;
-      color: white;
-      cursor: pointer;
-      margin-top: 15px;
-      font-weight: bold;
-      transition: 0.2s;
-    }
+<script>
+const WORKER_URL = "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev"; // ← replace me
 
-    button:hover {
-      background: #3b79
+async function sendMessage() {
+  const msg = document.getElementById("message").value;
+  const industry = document.getElementById("industry").value;
+  const role = document.getElementById("role").value;
+
+  if (!msg) return;
+
+  addMessage("you", msg);
+  document.getElementById("message").value = "";
+
+  const res = await fetch(WORKER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: msg, industry, role })
+  });
+
+  const data = await res.json();
+  addMessage("ai", data.reply);
+}
+
+function addMessage(type, text) {
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerHTML = `<span class="${type}">${type.toUpperCase()}:</span> ${text}`;
+  document.getElementById("chat").appendChild(div);
+  
+  const c = document.getElementById("chat");
+  c.scrollTop = c.scrollHeight;
+}
+</script>
+
+</body>
+</html>
+
 
